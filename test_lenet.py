@@ -27,7 +27,7 @@ if __name__ == '__main__':
     y_true[ds['train'][i]['label']] = 1
     input_tensor = Tensor(data=x)
   
-    out = lenet.forward(x)
+    out = lenet.forward(input_tensor)
     loss = softmax(out.data) - y_true.reshape(1, -1)
     out.backward(grad=loss)
     lenet.update_weights(lr=0.001)

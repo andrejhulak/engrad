@@ -1,7 +1,7 @@
 from engine import *
 import numpy as np
 from conv import *
-from lenet import *
+from alexnet import *
 from datasets import load_from_disk
 from nn import *
 from sklearn.metrics import accuracy_score
@@ -13,39 +13,41 @@ def softmax(x):
   return exp_x / np.sum(exp_x, axis=-1, keepdims=True)
 
 if __name__ == '__main__':
-  ds = load_from_disk('nums.hf')
-  input_shape = 400
+  # ds = load_from_disk('nums.hf')
+  input_shape = 6400
   hidden_layers = 2
-  hidden_units = 120
+  hidden_units = 4096
   output_shape = 10
-  lenet = LeNet(input_shape, hidden_units, hidden_layers, output_shape)
+  alexnet = AlexNet(input_shape, hidden_units, hidden_layers, output_shape)
   
-  for i in tqdm(range(len(ds['train']))):
-    x = np.array(ds['train'][i]['image']).reshape(1, 28, 28)
+  for i in range(2):
+    # x = np.array(ds['train'][i]['image']).reshape(1, 28, 28)
+    x = np.random.rand(3, 224, 224)
     y_true = np.zeros(output_shape)
-    label = ds['train'][i]['label']
-    y_true[ds['train'][i]['label']] = 1
+    y_true[0] = 1
+    # label = ds['train'][i]['label']
+    # y_true[ds['train'][i]['label']] = 1
     input_tensor = Tensor(data=x)
   
-    out = lenet.forward(x)
+    out = alexnet.forward(input_tensor)
     loss = softmax(out.data) - y_true.reshape(1, -1)
     out.backward(grad=loss)
-    lenet.update_weights(lr=0.001)
+    alexnet.update_weights(lr=0.001)
 
-  y_true_list = []
-  y_pred_list = []
+  # y_true_list = []
+  # y_pred_list = []
 
-  for i in tqdm(range(len(ds['test']))):
-    x = np.array(ds['test'][i]['image']).reshape(1, 28, 28) 
-    y_true = np.zeros(output_shape)
-    label = ds['test'][i]['label']  
-    y_true_list.append(label)
-    y_true[ds['test'][i]['label']] = 1
-    input_tensor = Tensor(data=x)
+  # for i in tqdm(range(len(ds['test']))):
+  #   x = np.array(ds['test'][i]['image']).reshape(1, 28, 28) 
+  #   y_true = np.zeros(output_shape)
+  #   label = ds['test'][i]['label']  
+  #   y_true_list.append(label)
+  #   y_true[ds['test'][i]['label']] = 1
+  #   input_tensor = Tensor(data=x)
 
-    output = lenet.forward(x)
+  #   output = alexnet.forward(x)
 
-    y_pred = np.argmax(softmax(output.data))
-    y_pred_list.append(y_pred)
+  #   y_pred = np.argmax(softmax(output.data))
+  #   y_pred_list.append(y_pred)
 
-  print(accuracy_score(y_true_list, y_pred_list))
+  # print(accuracy_score(y_true_list, y_pred_list))

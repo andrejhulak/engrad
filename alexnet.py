@@ -6,18 +6,19 @@ def init_radom_weights(shape1, shape2):
   bound = np.sqrt(6 / (shape1 + shape2))
   return Tensor(np.random.uniform(-bound, bound, (shape1, shape2)))
 
-class LeNet():
+class AlexNet():
   def __init__(self, input_shape, hidden_units, hidden_layers, output_shape):
-    self.conv_layer_1 = ConvLayer(in_channels=1, out_channels=6, kernel_size=5, stride=1, padding=2)
-    self.max_pool_1 = MaxPool(pool_size=2, stride=2)
+    self.conv_layer_1 = ConvLayer(in_channels=3, out_channels=96, kernel_size=11, stride=4, padding=0)
+    self.max_pool_1 = MaxPool(pool_size=3, stride=2)
 
-    self.conv_layer_2 = ConvLayer(in_channels=6, out_channels=16, kernel_size=5, stride=1, padding=0)
-    self.max_pool_2 = MaxPool(pool_size=2, stride=2)
+    self.conv_layer_2 = ConvLayer(in_channels=96, out_channels=256, kernel_size=5, stride=1, padding=2)
+    self.max_pool_2 = MaxPool(pool_size=3, stride=2)
 
-    self.conv_layer_3 = ConvLayer(in_channels=6, out_channels=16, kernel_size=5, stride=1, padding=0)
-    self.conv_layer_4 = ConvLayer(in_channels=6, out_channels=16, kernel_size=5, stride=1, padding=0)
-    self.conv_layer_5 = ConvLayer(in_channels=6, out_channels=16, kernel_size=5, stride=1, padding=0)
-
+    self.conv_layer_3 = ConvLayer(in_channels=256, out_channels=384, kernel_size=3, stride=1, padding=1)
+    self.conv_layer_4 = ConvLayer(in_channels=384, out_channels=384, kernel_size=3, stride=1, padding=1)
+    self.conv_layer_5 = ConvLayer(in_channels=384, out_channels=256, kernel_size=3, stride=1, padding=1)
+    self.max_pool_3 = MaxPool(pool_size=3, stride=2)
+    
     self.input_layer = init_radom_weights(input_shape, hidden_units)
 
     self.hidden_layers_dict = {}
@@ -30,17 +31,27 @@ class LeNet():
     self.bias_vec.append(Tensor(np.zeros((1, output_shape))))
 
   def forward(self, x):
-
     # conv layers
     out_c1 = self.conv_layer_1.forward(x)
     out_c1_relu = out_c1.relu()
     out_mp1 = self.max_pool_1.forward(out_c1_relu)
+
     out_c2 = self.conv_layer_2.forward(out_mp1)
     out_c2_relu = out_c2.relu()
     out_mp2 = self.max_pool_2.forward(out_c2_relu)
 
+    out_c3 = self.conv_layer_3.forward(out_mp2)
+    out_c3_relu = out_c3.relu()
+
+    out_c4 = self.conv_layer_4.forward(out_c3_relu)
+    out_c4_relu = out_c4.relu()
+
+    out_c5 = self.conv_layer_5.forward(out_c4_relu)
+    out_c5_relu = out_c5.relu()
+    out_mp3 = self.max_pool_2.forward(out_c5_relu)
+
     # nn layers
-    x = out_mp2.tflatten()
+    x = out_mp3.tflatten()
     inter = []
     inter.append(x)
 
@@ -67,6 +78,15 @@ class LeNet():
 
     self.conv_layer_2.weights.data -= lr * self.conv_layer_2.weights.grad 
     self.conv_layer_2.weights.zero_grad()
+
+    self.conv_layer_3.weights.data -= lr * self.conv_layer_3.weights.grad 
+    self.conv_layer_3.weights.zero_grad()
+
+    self.conv_layer_4.weights.data -= lr * self.conv_layer_4.weights.grad 
+    self.conv_layer_4.weights.zero_grad()
+
+    self.conv_layer_5.weights.data -= lr * self.conv_layer_5.weights.grad 
+    self.conv_layer_5.weights.zero_grad()
 
     self.input_layer.data -= lr * self.input_layer.grad
     self.input_layer.zero_grad()
