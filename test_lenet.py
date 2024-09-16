@@ -6,6 +6,7 @@ from datasets import load_from_disk
 from nn import *
 from sklearn.metrics import accuracy_score
 from tqdm import tqdm
+from optimizer import *
 
 def softmax(x):
   x_max = np.max(x, axis=-1, keepdims=True)
@@ -19,7 +20,9 @@ if __name__ == '__main__':
   hidden_units = 120
   output_shape = 10
   lenet = LeNet(input_shape, hidden_units, hidden_layers, output_shape)
-  
+
+  optimizer = Optimizer(parameters=lenet.parameters)
+
   for i in tqdm(range(len(ds['train']))):
     x = np.array(ds['train'][i]['image']).reshape(1, 28, 28)
     y_true = np.zeros(output_shape)
@@ -30,7 +33,8 @@ if __name__ == '__main__':
     out = lenet.forward(input_tensor)
     loss = softmax(out.data) - y_true.reshape(1, -1)
     out.backward(grad=loss)
-    lenet.update_weights(lr=0.001)
+    optimizer.optimize(learning_rate=0.001)
+    optimizer.zero_grad()
 
   y_true_list = []
   y_pred_list = []
