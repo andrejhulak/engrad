@@ -3,7 +3,7 @@ Working on the todo list below:
 
 TO DO:
 1. get a new dataset of colorful images - try 64x64, maybe 224x224 to fully test AlexNet
-2. change update_weights - create something like .parameters() in PyTorch
+2. change update_weights - create something like .parameters() in PyTorch ✔️ (kinda)
 3. performance - understand what's happening and what takes so long (AlexNet takes solid ~5s to process an "image")
 4. implement VGG
 5. ResNet later
